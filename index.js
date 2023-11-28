@@ -35,24 +35,38 @@ app.get('/getcomment', async (req, res) => {
     res.send(data)
 })
 
-app.get('/logincomment', async (req, res) => {
-    let qData = req.query
-    let data = await queryexecute("select * from comment where text=?", [qData.text]);
+// app.get('/logincomment', async (req, res) => {
+//     let qData = req.query
+//     let data = await queryexecute("select * from comment where text=?", [qData.text]);
 
 
-    console.log(data)
-    res.send(data)
-})
+//     console.log(data)
+//     res.send(data)
+// })
 
 
 app.post('/postcomment', async (req, res) => {
     let qData = await req.body;
-    await queryexecute("insert into comment (text) values (?) ", [qData.text]);
+    await queryexecute("insert into comment (text,id,password) values (?,?,?) ", [qData.text,qData.id,qData.password]);
     let data = await queryexecute("select * from comment");
 
 
     console.log(qData)
     res.send(data)
+})
+
+app.put('/updatecomment/:id', async(req,res) => {
+    const {id} = req.params;
+    let qData = await req.body;
+    let comment = await queryexecute("select * from comment where num=?",[id]);
+    if(comment.length > 0 && comment[0].password === qData.password){
+        await queryexecute("update comment set text =?  where num =?", [qData.text,id]);
+        let data = await queryexecute("select * from comment");
+        res.send({ success: true, data });
+    } else {
+        res.send({ success: false, message: '비밀번호가 일치하지 않습니다.' });
+    }
+
 })
 
 

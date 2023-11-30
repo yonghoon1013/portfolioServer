@@ -31,7 +31,6 @@ async function queryexecute(str, value) {
 app.get('/getcomment', async (req, res) => {
     let data = await queryexecute("select * from comment");
 
-    console.log(data)
     res.send(data)
 })
 
@@ -50,8 +49,6 @@ app.post('/postcomment', async (req, res) => {
     await queryexecute("insert into comment (text,id,password) values (?,?,?) ", [qData.text,qData.id,qData.password]);
     let data = await queryexecute("select * from comment");
 
-
-    console.log(qData)
     res.send(data)
 })
 
@@ -67,6 +64,19 @@ app.put('/updatecomment/:id', async(req,res) => {
         res.send({ success: false, message: '비밀번호가 일치하지 않습니다.' });
     }
 
+})
+
+app.post('/deletecomment/:id',async(req,res) => {
+    const {id} = req.params;
+    let qData = await req.body;
+    let comment = await queryexecute("select * from comment where num=?",[id]);
+    if(comment.length > 0 && comment[0].password === qData.password){
+        await queryexecute("delete from comment where num=?",[id]);
+        let data = await queryexecute("select * from comment");
+        res.send({ success: true, data });
+    } else {
+        res.send({ success: false, message: '비밀번호가 일치하지 않습니다.' });
+    }
 })
 
 
